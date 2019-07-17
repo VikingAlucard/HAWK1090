@@ -45,10 +45,18 @@ class ADSBdecoder_MR_base : public Component, protected ThreadedComponent
         CORBA::LongLong MessageCount;
         /// Property: PreambleCount
         CORBA::ULongLong PreambleCount;
+        /// Property: outputTracks
+        bool outputTracks;
+        /// Property: outputMessages
+        bool outputMessages;
 
         // Ports
         /// Port: input
         bulkio::InOctetPort *input;
+        /// Port: rawMessages
+        bulkio::OutOctetPort *rawMessages;
+        /// Port: processedTargets
+        bulkio::OutOctetPort *processedTargets;
 
     private:
 };
