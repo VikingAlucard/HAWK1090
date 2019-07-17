@@ -32,16 +32,33 @@
         <componentinstantiationref refid="ADSBdecoder_MR_1"/>
       </providesport>
     </connectinterface>
+    <connectinterface id="connection_1">
+      <usesport>
+        <usesidentifier>dataOctet_out</usesidentifier>
+        <deviceusedbyapplication usesrefid="RTL2832U_1"/>
+      </usesport>
+      <providesport>
+        <providesidentifier>input</providesidentifier>
+        <componentinstantiationref refid="ADSBdecoder_MR_1"/>
+      </providesport>
+    </connectinterface>
   </connections>
   <usesdevicedependencies>
-  <usesdevice id="DCE:aa2421b3-03f7-4a72-8f56-6994e4594344" type="usesDevice">
+    <usesdevice id="RTL2832U">
+      <propertyref refid="DCE:0f99b2e4-9903-4631-9846-ff349d18ecfb" value="RTL2832U"/>
       <propertyref refid="DCE:cdc5ee18-7ceb-4ae6-bf4c-31f983179b4d" value="FRONTEND::TUNER"/>
       <structref refid="FRONTEND::tuner_allocation">
         <simpleref refid="FRONTEND::tuner_allocation::tuner_type" value="RX_DIGITIZER"/>
-        <simpleref refid="FRONTEND::tuner_allocation::allocation_id" value="compMag"/>
-        <simpleref refid="FRONTEND::tuner_allocation::center_frequency" value="1090000000.0"/>
+        <simpleref refid="FRONTEND::tuner_allocation::allocation_id" value="94b86b97-4743-4cce-be36-e333893ad2df"/>
+        <simpleref refid="FRONTEND::tuner_allocation::center_frequency" value="1.09E9"/>
+        <simpleref refid="FRONTEND::tuner_allocation::bandwidth" value="0.0"/>
+        <simpleref refid="FRONTEND::tuner_allocation::bandwidth_tolerance" value="20.0"/>
         <simpleref refid="FRONTEND::tuner_allocation::sample_rate" value="2000000.0"/>
+        <simpleref refid="FRONTEND::tuner_allocation::sample_rate_tolerance" value="20.0"/>
+        <simpleref refid="FRONTEND::tuner_allocation::device_control" value="true"/>
+        <simpleref refid="FRONTEND::tuner_allocation::group_id" value=""/>
+        <simpleref refid="FRONTEND::tuner_allocation::rf_flow_id" value=""/>
       </structref>
     </usesdevice>
-    </usesdevicedependencies>
+  </usesdevicedependencies>
 </softwareassembly>

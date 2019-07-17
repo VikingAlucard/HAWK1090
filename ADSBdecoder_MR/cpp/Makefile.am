@@ -1,13 +1,15 @@
+ACLOCAL_AMFLAGS = -I m4 -I${OSSIEHOME}/share/aclocal/ossie
+AUTOMAKE_OPTIONS = subdir-objects
+
 ossieName = ADSBdecoder_MR
-bindir = $(prefix)/dom/components/ADSBdecoder_MR/cpp/
+bindir = $(prefix)/dom/components/ADSBdecoder_MR/cpp
 bin_PROGRAMS = ADSBdecoder_MR
 
-xmldir = $(prefix)/dom/components/ADSBdecoder_MR/
+xmldir = $(prefix)/dom/components/ADSBdecoder_MR
 dist_xml_DATA = ../ADSBdecoder_MR.scd.xml ../ADSBdecoder_MR.prf.xml ../ADSBdecoder_MR.spd.xml
-ACLOCAL_AMFLAGS = -I$(OSSIEHOME)/share/aclocal/ossie
-
 
 distclean-local:
+	rm -rf m4
 	rm -f config.*
 	rm -rf autom4te.cache
 	rm -f acinclude.m4
@@ -26,7 +28,7 @@ distclean-local:
 # you wish to manually control these options.
 include $(srcdir)/Makefile.am.ide
 ADSBdecoder_MR_SOURCES = $(redhawk_SOURCES_auto)
-ADSBdecoder_MR_LDADD = $(PROJECTDEPS_LIBS) $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(INTERFACEDEPS_LIBS) $(redhawk_LDADD_auto)
-ADSBdecoder_MR_CXXFLAGS = -Wall $(PROJECTDEPS_CFLAGS) $(BOOST_CPPFLAGS) $(INTERFACEDEPS_CFLAGS) $(redhawk_INCLUDES_auto)
+ADSBdecoder_MR_LDADD = $(SOFTPKG_LIBS) $(PROJECTDEPS_LIBS) $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(INTERFACEDEPS_LIBS) $(redhawk_LDADD_auto)
+ADSBdecoder_MR_CXXFLAGS = -Wall $(SOFTPKG_CFLAGS) $(PROJECTDEPS_CFLAGS) $(BOOST_CPPFLAGS) $(INTERFACEDEPS_CFLAGS) $(redhawk_INCLUDES_auto)
 ADSBdecoder_MR_LDFLAGS = -Wall $(redhawk_LDFLAGS_auto)
 

@@ -11,18 +11,21 @@
 ******************************************************************************************/
 
 ADSBdecoder_MR_base::ADSBdecoder_MR_base(const char *uuid, const char *label) :
-    Resource_impl(uuid, label),
+    Component(uuid, label),
     ThreadedComponent()
 {
+    setThreadName(label);
+
     loadProperties();
 
     input = new bulkio::InOctetPort("input");
+    input->setLogger(this->_baseLog->getChildLogger("input", "ports"));
     addPort("input", input);
 }
 
 ADSBdecoder_MR_base::~ADSBdecoder_MR_base()
 {
-    delete input;
+    input->_remove_ref();
     input = 0;
 }
 
@@ -32,13 +35,13 @@ ADSBdecoder_MR_base::~ADSBdecoder_MR_base()
 *******************************************************************************************/
 void ADSBdecoder_MR_base::start() throw (CORBA::SystemException, CF::Resource::StartError)
 {
-    Resource_impl::start();
+    Component::start();
     ThreadedComponent::startThread();
 }
 
 void ADSBdecoder_MR_base::stop() throw (CORBA::SystemException, CF::Resource::StopError)
 {
-    Resource_impl::stop();
+    Component::stop();
     if (!ThreadedComponent::stopThread()) {
         throw CF::Resource::StopError(CF::CF_NOTSET, "Processing thread did not die");
     }
@@ -53,7 +56,7 @@ void ADSBdecoder_MR_base::releaseObject() throw (CORBA::SystemException, CF::Lif
         // TODO - this should probably be logged instead of ignored
     }
 
-    Resource_impl::releaseObject();
+    Component::releaseObject();
 }
 
 void ADSBdecoder_MR_base::loadProperties()
@@ -65,7 +68,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(InteractiveMode,
                 1,
@@ -74,7 +77,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(StatsMode,
                 0,
@@ -83,7 +86,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(userLat,
                 39,
@@ -92,7 +95,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(userLong,
                 80,
@@ -101,7 +104,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(NetMode,
                 1,
@@ -110,7 +113,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(NetOnlyMode,
                 "0",
@@ -119,7 +122,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(ModeAC,
                 1,
@@ -128,7 +131,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(AggressiveMode,
                 1,
@@ -137,7 +140,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(MessageCount,
                 "MessageCount",
@@ -145,7 +148,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readonly",
                 "",
                 "external",
-                "configure");
+                "property");
 
     addProperty(PreambleCount,
                 0LL,
@@ -154,7 +157,7 @@ void ADSBdecoder_MR_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "configure");
+                "property");
 
 }
 

@@ -20,13 +20,13 @@ License:        None
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  redhawk-devel >= 2.0
-Requires:       redhawk >= 2.0
+BuildRequires:  redhawk-devel >= 2.2
+Requires:       redhawk >= 2.2
 
 
 # Interface requirements
-BuildRequires:  bulkioInterfaces >= 2.0
-Requires:       bulkioInterfaces >= 2.0
+BuildRequires:  bulkioInterfaces >= 2.2
+Requires:       bulkioInterfaces >= 2.2
 
 
 %description
@@ -64,7 +64,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,redhawk,redhawk,-)
-%dir %{_prefix}/dom/components/ADSBdecoder_MR
+%dir %{_sdrroot}/dom/components/ADSBdecoder_MR
 %{_prefix}/dom/components/ADSBdecoder_MR/ADSBdecoder_MR.scd.xml
 %{_prefix}/dom/components/ADSBdecoder_MR/ADSBdecoder_MR.prf.xml
 %{_prefix}/dom/components/ADSBdecoder_MR/ADSBdecoder_MR.spd.xml

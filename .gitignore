@@ -26,3 +26,24 @@
 *.exe
 *.out
 *.app
+
+# From RTL2832U project
+.deps
+Makefile
+Makefile.in
+acinclude.m4
+aclocal.m4
+autom4te.cache/
+config.guess
+config.log
+config.status
+config.sub
+configure
+depcomp
+install-sh
+ltmain.sh
+missing
+*.o
+*.pyc
+.md5sums
+ADSBdecoder_MR
