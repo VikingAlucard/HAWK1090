@@ -253,6 +253,7 @@ int ADSBdecoder_MR_i::serviceFunction() {
 
 	// Takes care of background processes such as displaying output in interactive modes
 	backgroundTasks();
+	//
 
 	// Compute statistics used for unit testing
 	MessageCount = Modes.stat_goodcrc + Modes.stat_ph_goodcrc + Modes.stat_fixed + Modes.stat_ph_fixed;

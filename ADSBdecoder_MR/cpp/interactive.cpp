@@ -29,8 +29,12 @@
 //
 
 #include "dump1090.h"
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include <iostream>
 
-
+using namespace rapidjson;
 
 //
 // ============================= Utility functions ==========================
@@ -416,38 +420,22 @@ void interactiveShowData(void) {
     struct aircraft *a = Modes.aircrafts;
     time_t now = time(NULL);
     int count = 0;
-    char progress;
-    char spinner[4] = "|/-\\";
 
-    // Refresh screen every (MODES_INTERACTIVE_REFRESH_TIME) miliseconde
+    // Refresh screen every (MODES_INTERACTIVE_REFRESH_TIME) milliseconds
     if ((mstime() - Modes.interactive_last_update) < MODES_INTERACTIVE_REFRESH_TIME)
        {return;}
 
     Modes.interactive_last_update = mstime();
 
-    // Attempt to reconsile any ModeA/C with known Mode-S
-    // We can't condition on Modes.modeac because ModeA/C could be comming
+    // Attempt to reconcile any ModeA/C with known Mode-S
+    // We can't condition on Modes.modeac because ModeA/C could be coming
     // in from a raw input port which we can't turn off.
     interactiveUpdateAircraftModeS();
 
-    progress = spinner[time(NULL)%4];
-
-#ifndef _WIN32
-    printf("\x1b[H\x1b[2J");    // Clear the screen
-#else
-    cls();
-#endif
-
-    if (Modes.interactive_rtl1090 == 0) {
-        printf (
-"Hex     Mode  Sqwk  Flight   Alt    Spd  Hdg    Lat      Long   Sig  Msgs   Ti%c\n", progress);
-    } else {
-        printf (
-"Hex    Flight   Alt      V/S GS  TT  SSR  G*456^ Msgs    Seen %c\n", progress);
-    }
-    printf(
-"-------------------------------------------------------------------------------\n");
-
+    // Create a new JSON document
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    writer.StartArray();
     while(a && (count < Modes.interactive_rows)) {
 
         if ((now - a->seen) < Modes.interactive_display_ttl)
@@ -459,7 +447,10 @@ void interactiveShowData(void) {
               || (((flags & (MODEAC_MSG_MODES_HIT | MODEAC_MSG_MODEA_ONLY)) == MODEAC_MSG_MODEA_ONLY) && (msgs > 4  ) ) 
               || (((flags & (MODEAC_MSG_MODES_HIT | MODEAC_MSG_MODEC_OLD )) == 0                    ) && (msgs > 127) ) 
               ) {
-                int altitude = a->altitude, speed = a->speed;
+            	// New JSON object
+            	writer.StartObject();
+
+            	int altitude = a->altitude, speed = a->speed;
                 char strSquawk[5] = " ";
                 char strFl[6]     = " ";
                 char strTt[5]     = " ";
@@ -471,27 +462,34 @@ void interactiveShowData(void) {
                     speed    = (int) (speed    * 1.852);
                 }
 
-                if (a->bFlags & MODES_ACFLAGS_SQUAWK_VALID) {
-                    snprintf(strSquawk,5,"%04x", a->modeA);}
+                writer.Key("address");
+                writer.Uint(a->addr);
+                writer.Key("squawk");
+                if (a->bFlags & MODES_ACFLAGS_SQUAWK_VALID){
+                	snprintf(strSquawk,5,"%04x", a->modeA);
+                    writer.String(strSquawk);
+                }
+                else
+                	writer.Null();
+                writer.Key("flight");
+                writer.String(a->flight);
+                writer.Key("speed");
+                if (a->bFlags & MODES_ACFLAGS_SPEED_VALID)
+                	writer.Uint(speed);
+                else
+                    writer.Null();
+                writer.Key("heading");
+                if (a->bFlags & MODES_ACFLAGS_HEADING_VALID)
+                	writer.Uint(a->track);
+                else
+                    writer.Null();
 
-                if (a->bFlags & MODES_ACFLAGS_SPEED_VALID) {
-                    snprintf (strGs, 5,"%3d", speed);}
-
-                if (a->bFlags & MODES_ACFLAGS_HEADING_VALID) {
-                    snprintf (strTt, 5,"%03d", a->track);}
-
+                writer.Key("messages");
+                writer.Uint(msgs);
                 if (msgs > 99999) {
                     msgs = 99999;}
 
-                if (Modes.interactive_rtl1090) { // RTL1090 display mode
-
-                    if (a->bFlags & MODES_ACFLAGS_ALTITUDE_VALID) {
-                        snprintf(strFl,6,"F%03d",(altitude/100));
-                    }
-                    printf("%06x %-8s %-4s         %-3s %-3s %4s        %-6d  %-2d\n", 
-                    a->addr, a->flight, strFl, strGs, strTt, strSquawk, msgs, (int)(now - a->seen));
-
-                } else {                         // Dump1090 display mode
+                if (1){                         // Dump1090 display mode
                     char strMode[5]               = "    ";
                     char strLat[8]                = " ";
                     char strLon[9]                = " ";
@@ -522,16 +520,24 @@ void interactiveShowData(void) {
                     a->addr, strMode, strSquawk, a->flight, strFl, strGs, strTt,
                     strLat, strLon, signalAverage, msgs, (int)(now - a->seen));
                 }
+                writer.EndObject();
                 count++;
             }
         }
+
         a = a->next;
     }
+    // Close document and push to port
+    // Print and clean for debug TODO
+    writer.EndArray();
+    std::cout << buffer.GetString() << std::endl;
+    //buffer.Clear();
+    //writer.Flush();
 }
 //
 //=========================================================================
 //
-// When in interactive mode If we don't receive new nessages within
+// When in interactive mode If we don't receive new messages within
 // MODES_INTERACTIVE_DELETE_TTL seconds we remove the aircraft from the list.
 //
 void interactiveRemoveStaleAircrafts(void) {

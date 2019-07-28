@@ -17,7 +17,7 @@
       <localfile name="cpp/ADSBdecoder_MR"/>
       <entrypoint>cpp/ADSBdecoder_MR</entrypoint>
     </code>
-    <compiler name="/usr/bin/gcc" version="4.1.2"/>
+    <compiler name="/usr/bin/g++" version="4.8.5"/>
     <programminglanguage name="C++"/>
     <humanlanguage name="EN"/>
     <os name="Linux"/>
