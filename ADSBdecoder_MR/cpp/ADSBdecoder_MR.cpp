@@ -219,7 +219,9 @@ int ADSBdecoder_MR_i::serviceFunction() {
 	LOG_DEBUG(ADSBdecoder_MR_i, "serviceFunction() example log message");
 
 	string stream_id = "testStream";
+	string stream_out_id = "targets";
 	BULKIO::StreamSRI sri = bulkio::sri::create(stream_id);
+	BULKIO::PrecisionUTCTime tstamp = bulkio::time::utils::now();
 
 	bulkio::InOctetPort::dataTransfer *tmp = input->getPacket(bulkio::Const::BLOCKING);
 
@@ -251,9 +253,15 @@ int ADSBdecoder_MR_i::serviceFunction() {
 	// Detect Mode S and optionally Mode A/C messages in the input buffer, then decode them
 	detectModeS(Modes.magnitude, buffer_length);
 
-	// Takes care of background processes such as displaying output in interactive modes
+	// Takes care of background processes
 	backgroundTasks();
-	//
+	// Get JSON data and push
+	if(outputTracks){
+		std::string str = getJSONData();
+		std::cout << "Pushing JSON:" << str << std::endl;
+		std::vector<unsigned char> data(str.begin(),str.end());
+		processedTargets->pushPacket(data,tstamp,false,stream_out_id);
+	}
 
 	// Compute statistics used for unit testing
 	MessageCount = Modes.stat_goodcrc + Modes.stat_ph_goodcrc + Modes.stat_fixed + Modes.stat_ph_fixed;

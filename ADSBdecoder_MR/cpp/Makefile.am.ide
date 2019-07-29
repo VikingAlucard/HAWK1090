@@ -13,6 +13,7 @@ redhawk_SOURCES_auto += coaa.h
 redhawk_SOURCES_auto += dump1090.c
 redhawk_SOURCES_auto += dump1090.h
 redhawk_SOURCES_auto += interactive.cpp
+redhawk_SOURCES_auto += interactive.h
 redhawk_SOURCES_auto += main.cpp
 redhawk_SOURCES_auto += mode_ac.c
 redhawk_SOURCES_auto += mode_s.c

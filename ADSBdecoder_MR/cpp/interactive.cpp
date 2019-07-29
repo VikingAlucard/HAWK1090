@@ -29,6 +29,7 @@
 //
 
 #include "dump1090.h"
+#include "interactive.h"
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
@@ -534,6 +535,124 @@ void interactiveShowData(void) {
     //buffer.Clear();
     //writer.Flush();
 }
+
+//
+//=========================================================================
+//
+// Show the currently captured interactive data on screen.
+//
+std::string getJSONData(void) {
+    struct aircraft *a = Modes.aircrafts;
+    time_t now = time(NULL);
+    int count = 0;
+
+    // Attempt to reconcile any ModeA/C with known Mode-S
+    // We can't condition on Modes.modeac because ModeA/C could be coming
+    // in from a raw input port which we can't turn off.
+    interactiveUpdateAircraftModeS();
+
+    // Create a new JSON document
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    writer.StartArray();
+    while(a && (count < Modes.interactive_rows)) {
+
+        if ((now - a->seen) < Modes.interactive_display_ttl)
+            {
+            int msgs  = a->messages;
+            int flags = a->modeACflags;
+
+            if ( (((flags & (MODEAC_MSG_FLAG                             )) == 0                    )                 )
+              || (((flags & (MODEAC_MSG_MODES_HIT | MODEAC_MSG_MODEA_ONLY)) == MODEAC_MSG_MODEA_ONLY) && (msgs > 4  ) )
+              || (((flags & (MODEAC_MSG_MODES_HIT | MODEAC_MSG_MODEC_OLD )) == 0                    ) && (msgs > 127) )
+              ) {
+            	// New JSON object
+            	writer.StartObject();
+
+            	int altitude = a->altitude, speed = a->speed;
+                char strSquawk[5] = " ";
+                char strFl[6]     = " ";
+                char strTt[5]     = " ";
+                char strGs[5]     = " ";
+
+                // Convert units to metric if --metric was specified
+                if (Modes.metric) {
+                    altitude = (int) (altitude / 3.2828);
+                    speed    = (int) (speed    * 1.852);
+                }
+
+                writer.Key("address");
+                writer.Uint(a->addr);
+                writer.Key("squawk");
+                if (a->bFlags & MODES_ACFLAGS_SQUAWK_VALID){
+                	snprintf(strSquawk,5,"%04x", a->modeA);
+                    writer.String(strSquawk);
+                }
+                else
+                	writer.Null();
+                writer.Key("flight");
+                writer.String(a->flight);
+                writer.Key("speed");
+                if (a->bFlags & MODES_ACFLAGS_SPEED_VALID)
+                	writer.Uint(speed);
+                else
+                    writer.Null();
+                writer.Key("heading");
+                if (a->bFlags & MODES_ACFLAGS_HEADING_VALID)
+                	writer.Uint(a->track);
+                else
+                    writer.Null();
+
+                writer.Key("messages");
+                writer.Uint(msgs);
+                if (msgs > 99999) {
+                    msgs = 99999;}
+
+                if (1){                         // Dump1090 display mode
+                    char strMode[5]               = "    ";
+                    char strLat[8]                = " ";
+                    char strLon[9]                = " ";
+                    unsigned char * pSig       = a->signalLevel;
+                    unsigned int signalAverage = (pSig[0] + pSig[1] + pSig[2] + pSig[3] +
+                                                  pSig[4] + pSig[5] + pSig[6] + pSig[7] + 3) >> 3;
+
+                    if ((flags & MODEAC_MSG_FLAG) == 0) {
+                        strMode[0] = 'S';
+                    } else if (flags & MODEAC_MSG_MODEA_ONLY) {
+                        strMode[0] = 'A';
+                    }
+                    if (flags & MODEAC_MSG_MODEA_HIT) {strMode[2] = 'a';}
+                    if (flags & MODEAC_MSG_MODEC_HIT) {strMode[3] = 'c';}
+
+                    if (a->bFlags & MODES_ACFLAGS_LATLON_VALID) {
+                        snprintf(strLat, 8,"%7.03f", a->lat);
+                        snprintf(strLon, 9,"%8.03f", a->lon);
+                    }
+
+                    if (a->bFlags & MODES_ACFLAGS_AOG) {
+                        snprintf(strFl, 6," grnd");
+                    } else if (a->bFlags & MODES_ACFLAGS_ALTITUDE_VALID) {
+                        snprintf(strFl, 6, "%5d", altitude);
+                    }
+
+                    printf("%06X  %-4s  %-4s  %-8s %5s  %3s  %3s  %7s %8s  %3d %5d   %2d\n",
+                    a->addr, strMode, strSquawk, a->flight, strFl, strGs, strTt,
+                    strLat, strLon, signalAverage, msgs, (int)(now - a->seen));
+                }
+                writer.EndObject();
+                count++;
+            }
+        }
+
+        a = a->next;
+    }
+    // Close document and push to port
+    // Print and clean for debug TODO
+    writer.EndArray();
+    //std::cout << buffer.GetString() << std::endl;
+    return buffer.GetString();
+}
+
 //
 //=========================================================================
 //

@@ -12,6 +12,7 @@ extern "C"
 {
 #include "dump1090.h"
 }
+#include "interactive.h"
 
 class ADSBdecoder_MR_i : public ADSBdecoder_MR_base
 {
