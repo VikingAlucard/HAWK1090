@@ -418,6 +418,7 @@ struct aircraft *interactiveReceiveData(struct modesMessage *mm, struct client *
 // Show the currently captured interactive data on screen.
 //
 void interactiveShowData(void) {
+	return;
     struct aircraft *a = Modes.aircrafts;
     time_t now = time(NULL);
     int count = 0;
@@ -509,6 +510,13 @@ void interactiveShowData(void) {
                     if (a->bFlags & MODES_ACFLAGS_LATLON_VALID) {
                         snprintf(strLat, 8,"%7.03f", a->lat);
                         snprintf(strLon, 9,"%8.03f", a->lon);
+                        writer.Key("location");
+                        writer.StartObject();
+                        writer.Key("lat");
+                        writer.Double(a->lat);
+                        writer.Key("lon");
+                        writer.Double(a->lon);
+                        writer.EndObject();
                     }
 
                     if (a->bFlags & MODES_ACFLAGS_AOG) {
@@ -541,7 +549,7 @@ void interactiveShowData(void) {
 //
 // Show the currently captured interactive data on screen.
 //
-std::string getJSONData(void) {
+std::vector<std::string> getJSONData(void) {
     struct aircraft *a = Modes.aircrafts;
     time_t now = time(NULL);
     int count = 0;
@@ -551,10 +559,13 @@ std::string getJSONData(void) {
     // in from a raw input port which we can't turn off.
     interactiveUpdateAircraftModeS();
 
-    // Create a new JSON document
-    StringBuffer buffer;
-    Writer<StringBuffer> writer(buffer);
-    writer.StartArray();
+    // Refresh screen every (MODES_INTERACTIVE_REFRESH_TIME) milliseconds
+    if ((mstime() - Modes.interactive_last_update) < 4*MODES_INTERACTIVE_REFRESH_TIME)
+        {return std::vector<std::string>();}
+
+    Modes.interactive_last_update = mstime();
+
+    std::vector<std::string> jsonArr;
     while(a && (count < Modes.interactive_rows)) {
 
         if ((now - a->seen) < Modes.interactive_display_ttl)
@@ -566,14 +577,13 @@ std::string getJSONData(void) {
               || (((flags & (MODEAC_MSG_MODES_HIT | MODEAC_MSG_MODEA_ONLY)) == MODEAC_MSG_MODEA_ONLY) && (msgs > 4  ) )
               || (((flags & (MODEAC_MSG_MODES_HIT | MODEAC_MSG_MODEC_OLD )) == 0                    ) && (msgs > 127) )
               ) {
-            	// New JSON object
+            	// Create a new JSON object
+                StringBuffer buffer;
+                Writer<StringBuffer> writer(buffer);
             	writer.StartObject();
 
             	int altitude = a->altitude, speed = a->speed;
                 char strSquawk[5] = " ";
-                char strFl[6]     = " ";
-                char strTt[5]     = " ";
-                char strGs[5]     = " ";
 
                 // Convert units to metric if --metric was specified
                 if (Modes.metric) {
@@ -609,37 +619,43 @@ std::string getJSONData(void) {
                     msgs = 99999;}
 
                 if (1){                         // Dump1090 display mode
-                    char strMode[5]               = "    ";
-                    char strLat[8]                = " ";
-                    char strLon[9]                = " ";
+                    //char strMode[5]               = "    ";
                     unsigned char * pSig       = a->signalLevel;
                     unsigned int signalAverage = (pSig[0] + pSig[1] + pSig[2] + pSig[3] +
                                                   pSig[4] + pSig[5] + pSig[6] + pSig[7] + 3) >> 3;
+                    writer.Key("signalPower");
+                    writer.Uint(signalAverage);
 
-                    if ((flags & MODEAC_MSG_FLAG) == 0) {
+                    /*if ((flags & MODEAC_MSG_FLAG) == 0) {
                         strMode[0] = 'S';
                     } else if (flags & MODEAC_MSG_MODEA_ONLY) {
                         strMode[0] = 'A';
                     }
                     if (flags & MODEAC_MSG_MODEA_HIT) {strMode[2] = 'a';}
                     if (flags & MODEAC_MSG_MODEC_HIT) {strMode[3] = 'c';}
+					*/
 
                     if (a->bFlags & MODES_ACFLAGS_LATLON_VALID) {
-                        snprintf(strLat, 8,"%7.03f", a->lat);
-                        snprintf(strLon, 9,"%8.03f", a->lon);
+                    	writer.Key("location");
+                    	writer.StartObject();
+                    	writer.Key("lat");
+                    	writer.Double(a->lat);
+                    	writer.Key("lon");
+                    	writer.Double(a->lon);
+                    	writer.EndObject();
                     }
 
                     if (a->bFlags & MODES_ACFLAGS_AOG) {
-                        snprintf(strFl, 6," grnd");
+                    	writer.Key("altitude");
+                    	writer.Uint(0);
                     } else if (a->bFlags & MODES_ACFLAGS_ALTITUDE_VALID) {
-                        snprintf(strFl, 6, "%5d", altitude);
+                    	writer.Key("altitude");
+                    	writer.Uint(a->altitude);
                     }
-
-                    printf("%06X  %-4s  %-4s  %-8s %5s  %3s  %3s  %7s %8s  %3d %5d   %2d\n",
-                    a->addr, strMode, strSquawk, a->flight, strFl, strGs, strTt,
-                    strLat, strLon, signalAverage, msgs, (int)(now - a->seen));
                 }
                 writer.EndObject();
+                jsonArr.push_back(buffer.GetString());
+                writer.Flush();
                 count++;
             }
         }
@@ -647,10 +663,8 @@ std::string getJSONData(void) {
         a = a->next;
     }
     // Close document and push to port
-    // Print and clean for debug TODO
-    writer.EndArray();
-    //std::cout << buffer.GetString() << std::endl;
-    return buffer.GetString();
+
+    return jsonArr;
 }
 
 //

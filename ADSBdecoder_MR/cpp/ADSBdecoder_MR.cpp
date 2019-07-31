@@ -257,10 +257,12 @@ int ADSBdecoder_MR_i::serviceFunction() {
 	backgroundTasks();
 	// Get JSON data and push
 	if(outputTracks){
-		std::string str = getJSONData();
-		std::cout << "Pushing JSON:" << str << std::endl;
-		std::vector<unsigned char> data(str.begin(),str.end());
-		processedTargets->pushPacket(data,tstamp,false,stream_out_id);
+		std::vector<std::string> jsonArr = getJSONData();
+		for (string str : jsonArr){
+			std::cout << "Pushing JSON:" << str << std::endl;
+			std::vector<unsigned char> data(str.begin(),str.end());
+			processedTargets->pushPacket(data,tstamp,false,stream_out_id);
+		}
 	}
 
 	// Compute statistics used for unit testing

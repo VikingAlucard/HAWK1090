@@ -9,8 +9,9 @@
 #define INTERACTIVE_H_
 
 #include <string>
+#include <vector>
 
-std::string getJSONData(void);
+std::vector<std::string> getJSONData(void);
 
 
 
