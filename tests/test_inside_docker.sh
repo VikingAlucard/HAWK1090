@@ -33,7 +33,7 @@ gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhawk
 EOF
 
-yum -y groupinstall "REDHAWK Runtime"
+yum -y groupinstall "REDHAWK Development"
 
 . /etc/profile.d/redhawk.sh
 . /etc/profile.d/redhawk-sdrroot.sh
