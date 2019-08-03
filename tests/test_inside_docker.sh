@@ -15,7 +15,7 @@ rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_VERSION}
 echo "exclude=mirror.beyondhosting.net" >> /etc/yum/pluginconf.d/fastestmirror.conf
 
 yum -y install yum-plugin-priorities
-yum -y install rpm-build gcc gcc-c++ boost-devel cmake git tar gzip make autotools wget
+yum -y install rpm-build gcc gcc-c++ boost-devel cmake git tar gzip make autotools autoconf wget
 
 # Get REDHAWK rpm
 wget https://github.com/RedhawkSDR/redhawk/releases/download/2.2.0/redhawk-yum-2.2.0-el${OS_VERSION}-x86_64.tar.gz
