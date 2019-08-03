@@ -39,7 +39,7 @@ yum -y groupinstall "REDHAWK Runtime"
 . /etc/profile.d/redhawk-sdrroot.sh
 
 #sudo /usr/sbin/usermod -a -G redhawk <username>
-cd ADSBdecoder_MR
+cd /HAWK1090/ADSBdecoder_MR
 ./build.sh
 ./build.sh install
 
