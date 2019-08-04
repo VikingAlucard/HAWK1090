@@ -17,10 +17,12 @@ echo "exclude=mirror.beyondhosting.net" >> /etc/yum/pluginconf.d/fastestmirror.c
 yum -y install yum-plugin-priorities
 yum -y install rpm-build gcc gcc-c++ boost-devel cmake git tar gzip make autotools autoconf automake wget
 
-if ["${OS_VERSION}" = "6" ]; then
-    yum install centos-release-scl
-    yum upgrade
-    yum install -y devtoolset-7
+if [ "$OS_VERSION" = "6" ]; then
+
+yum install centos-release-scl
+yum upgrade
+yum install -y devtoolset-7
+
 fi
 
 # Get REDHAWK rpm
