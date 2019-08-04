@@ -17,8 +17,19 @@ echo "exclude=mirror.beyondhosting.net" >> /etc/yum/pluginconf.d/fastestmirror.c
 yum -y install yum-plugin-priorities
 yum -y install rpm-build gcc gcc-c++ boost-devel cmake git tar gzip make autotools autoconf automake wget
 
+if [ "$OS_VERSION" = "6" ]; then
+
+yum -y install centos-release-scl
+yum -y upgrade
+yum -y install devtoolset-7
+scl enable devtoolset-7 bash
+source /opt/rh/devtoolset-7/enable
+which gcc
+
+fi
+
 # Get REDHAWK rpm
-wget https://github.com/RedhawkSDR/redhawk/releases/download/2.2.0/redhawk-yum-2.2.0-el${OS_VERSION}-x86_64.tar.gz
+wget -nv https://github.com/RedhawkSDR/redhawk/releases/download/2.2.0/redhawk-yum-2.2.0-el${OS_VERSION}-x86_64.tar.gz
 tar xzvf redhawk-yum-2.2.0-el${OS_VERSION}-x86_64.tar.gz
 cd redhawk-2.2.0-el${OS_VERSION}-x86_64
 yum install -y redhawk-release*.rpm
