@@ -65,4 +65,14 @@
     <kind kindtype="property"/>
     <action type="external"/>
   </simple>
+  <simple id="outputTracks" mode="readwrite" name="outputTracks" type="boolean">
+    <value>False</value>
+    <kind kindtype="property"/>
+    <action type="external"/>
+  </simple>
+  <simple id="outputMessages" mode="readwrite" name="outputMessages" type="boolean">
+    <value>False</value>
+    <kind kindtype="property"/>
+    <action type="external"/>
+  </simple>
 </properties>

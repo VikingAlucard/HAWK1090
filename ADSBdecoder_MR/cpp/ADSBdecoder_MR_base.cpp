@@ -21,12 +21,22 @@ ADSBdecoder_MR_base::ADSBdecoder_MR_base(const char *uuid, const char *label) :
     input = new bulkio::InOctetPort("input");
     input->setLogger(this->_baseLog->getChildLogger("input", "ports"));
     addPort("input", input);
+    rawMessages = new bulkio::OutOctetPort("rawMessages");
+    rawMessages->setLogger(this->_baseLog->getChildLogger("rawMessages", "ports"));
+    addPort("rawMessages", rawMessages);
+    processedTargets = new bulkio::OutOctetPort("processedTargets");
+    processedTargets->setLogger(this->_baseLog->getChildLogger("processedTargets", "ports"));
+    addPort("processedTargets", processedTargets);
 }
 
 ADSBdecoder_MR_base::~ADSBdecoder_MR_base()
 {
     input->_remove_ref();
     input = 0;
+    rawMessages->_remove_ref();
+    rawMessages = 0;
+    processedTargets->_remove_ref();
+    processedTargets = 0;
 }
 
 /*******************************************************************************************
@@ -154,6 +164,24 @@ void ADSBdecoder_MR_base::loadProperties()
                 0LL,
                 "PreambleCount",
                 "",
+                "readwrite",
+                "",
+                "external",
+                "property");
+
+    addProperty(outputTracks,
+                false,
+                "outputTracks",
+                "outputTracks",
+                "readwrite",
+                "",
+                "external",
+                "property");
+
+    addProperty(outputMessages,
+                false,
+                "outputMessages",
+                "outputMessages",
                 "readwrite",
                 "",
                 "external",

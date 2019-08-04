@@ -46,4 +46,4 @@ missing
 *.o
 *.pyc
 .md5sums
-ADSBdecoder_MR
+#ADSBdecoder_MR
