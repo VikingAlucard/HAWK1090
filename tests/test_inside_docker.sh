@@ -20,7 +20,7 @@ yum -y install rpm-build gcc gcc-c++ boost-devel cmake git tar gzip make autotoo
 if [ "$OS_VERSION" = "6" ]; then
 
 yum -y install centos-release-scl
-yum upgrade
+yum -y upgrade
 yum -y install devtoolset-7
 
 fi
