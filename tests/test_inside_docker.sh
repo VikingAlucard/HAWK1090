@@ -15,7 +15,21 @@ rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_VERSION}
 echo "exclude=mirror.beyondhosting.net" >> /etc/yum/pluginconf.d/fastestmirror.conf
 
 yum -y install yum-plugin-priorities
-yum -y install rpm-build gcc gcc-c++ boost-devel cmake git tar gzip make autotools autoconf automake wget
+yum -y install rpm-build gcc gcc-c++ cmake git tar gzip make autotools autoconf automake wget
+
+if [ "$OS_VERSION" = "6" ]; then
+
+#yum -y install http://repo.okay.com.mx/centos/6/x86_64/release/okay-release-1-1.noarch.rpm
+wget -nv https://bintray.com/vicendominguez/CentOS6/rpm -O /etc/yum.repos.d/bintray-vicendominguez-CentOS6.repo
+yum -y install boost-devel
+yum -y install centos-release-scl
+yum -y upgrade
+yum -y install devtoolset-7
+scl enable devtoolset-7 bash
+source /opt/rh/devtoolset-7/enable
+which gcc
+
+fi
 
 if [ "$OS_VERSION" = "6" ]; then
 
