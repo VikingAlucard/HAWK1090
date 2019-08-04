@@ -19,7 +19,8 @@ yum -y install rpm-build gcc gcc-c++ cmake git tar gzip make autotools autoconf 
 
 if [ "$OS_VERSION" = "6" ]; then
 
-yum -y install http://repo.okay.com.mx/centos/6/x86_64/release/okay-release-1-1.noarch.rpm
+#yum -y install http://repo.okay.com.mx/centos/6/x86_64/release/okay-release-1-1.noarch.rpm
+wget -nv https://bintray.com/vicendominguez/CentOS6/rpm -O /etc/yum.repos.d/bintray-vicendominguez-CentOS6.repo
 yum -y install boost-devel
 yum -y install centos-release-scl
 yum -y upgrade
