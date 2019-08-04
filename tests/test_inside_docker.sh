@@ -22,6 +22,7 @@ if [ "$OS_VERSION" = "6" ]; then
 yum -y install centos-release-scl
 yum -y upgrade
 yum -y install devtoolset-7
+scl enable devtoolset-7 bash
 
 fi
 
