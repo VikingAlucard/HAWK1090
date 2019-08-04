@@ -23,11 +23,13 @@ yum -y install centos-release-scl
 yum -y upgrade
 yum -y install devtoolset-7
 scl enable devtoolset-7 bash
+source /opt/rh/devtoolset-7/enable
+which gcc
 
 fi
 
 # Get REDHAWK rpm
-wget https://github.com/RedhawkSDR/redhawk/releases/download/2.2.0/redhawk-yum-2.2.0-el${OS_VERSION}-x86_64.tar.gz
+wget -nv https://github.com/RedhawkSDR/redhawk/releases/download/2.2.0/redhawk-yum-2.2.0-el${OS_VERSION}-x86_64.tar.gz
 tar xzvf redhawk-yum-2.2.0-el${OS_VERSION}-x86_64.tar.gz
 cd redhawk-2.2.0-el${OS_VERSION}-x86_64
 yum install -y redhawk-release*.rpm
